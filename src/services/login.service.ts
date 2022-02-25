@@ -15,7 +15,7 @@ export const createToken = async (body: LoginBody) => {
 
   const user = await userRepository.findOne({
     where: { email },
-    select: ["password"],
+    select: ["id", "password"],
   });
 
   if (!user) {

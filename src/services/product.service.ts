@@ -1,36 +1,51 @@
-// import { getRepository } from "typeorm";
-// import { Cart, Product } from "../entities";
-// import ErrorHandler from "../errors/errorHandler";
+import { getRepository } from "typeorm";
+import { User, Cart, Product } from "../entities";
+import ErrorHandler from "../errors/errorHandler";
 
-// interface CreateProductBody {
-//   name: string;
-//   cpf: string;
-//   email: string;
-//   phone: string;
-//   isAdm: boolean;
-//   password: string;
-// }
+interface CreateProductBody {
+  name: string;
+  brand: string;
+  price: number;
+  description: string;
+  stock: number;
+}
 
-// export const createProduct = async (body: CreateProductBody) => {
-//   const productRepository = getRepository(Product);
-//   const product = productRepository.create({ ...body });
-//   await productRepository.save(product);
-//   const newproduct = await productRepository.findOne(product.id);
-//   return newproduct;
-// };
+export const createProduct = async (
+  idLogged: string,
+  body: CreateProductBody
+) => {
+  const userRepository = getRepository(User);
+  const productRepository = getRepository(Product);
 
-// export const listProducts = async () => {
-//   const productRepository = getRepository(Product);
-//   const products = await productRepository.find();
-//   console.log(products);
-//   return products;
-// };
+  const userLogged = await userRepository.findOne(idLogged);
 
-// export const retrieveProduct = async (productId: string) => {
-//   const productRepository = getRepository(Product);
-//   const product = await productRepository.findOne(productId);
-//   if (!product) {
-//     throw new ErrorHandler(404, "Product not found");
-//   }
-//   return product;
-// };
+  if (!userLogged?.isAdm) {
+    throw new ErrorHandler(401, "unauthorized");
+  }
+
+  const product = productRepository.create({ ...body });
+
+  const newProduct = await productRepository.save(product);
+
+  return newProduct;
+};
+
+export const listProducts = async () => {
+  const productRepository = getRepository(Product);
+
+  const products = await productRepository.find();
+
+  return products;
+};
+
+export const findProduct = async (productId: string) => {
+  const productRepository = getRepository(Product);
+
+  const product = await productRepository.findOne(productId);
+
+  if (!product) {
+    throw new ErrorHandler(404, "product not found");
+  }
+
+  return product;
+};
