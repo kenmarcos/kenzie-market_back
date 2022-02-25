@@ -7,7 +7,10 @@ export const login = async (
   next: NextFunction
 ) => {
   try {
-    const token = await createToken(req.body);
+    const { body } = req;
+
+    const token = await createToken(body);
+
     return res.json({ token });
   } catch (e) {
     next(e);

@@ -13,11 +13,10 @@ export const createToken = async (body: LoginBody) => {
   const { email, password } = body;
   const userRepository = getRepository(User);
 
-  const user = await userRepository
-    .createQueryBuilder("user")
-    .where("user.email = :email", { email: email })
-    .addSelect("user.password")
-    .getOne();
+  const user = await userRepository.findOne({
+    where: { email },
+    select: ["password"],
+  });
 
   if (!user) {
     throw new ErrorHandler(404, "User not found");
