@@ -1,0 +1,35 @@
+<style>
+  .message-content { font-family: Arial, Helvetica, sans-serif; max-width:
+  600px; font-size: 18px; line-height: 21px; } h1, h2 {color: #0000ff} table {
+  min-width: 250px; text-align: center; border: 1px solid black; border-radius:
+  5px; } tr:nth-child(even) { background: #c7c7c7b8; } tr:nth-child(odd) {
+  background:#cfcfcf7a; }
+</style>
+<div class="message-content">
+  <h1>Olá {{name}}!</h1>
+  <h2>Recebemos seu Pedido</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Preço</th>
+      </tr>
+    </thead>
+    {{#each products}}
+      <tr>
+        <td>{{this.name}}</td>
+        <td>R${{this.price}}</td>
+      </tr>
+    {{/each}}
+    <tfoot>
+      <tr>
+        <td style="font-size: 14px;">TOTAL</td>
+        <td>R${{total}}</td>
+      </tr>
+    </tfoot>
+  </table>
+  <p>Ficamos muito contentes por você comprar com a gente.</p>
+  <p>Muito obrigado pela preferência!</p>
+  <p>Atenciosamente,</p>
+  <p>Equipe Kenzie Market.</p>
+</div>
