@@ -8,6 +8,6 @@ export const handleError = (
   next: NextFunction
 ) => {
   if (err instanceof ErrorHandler) {
-    return res.status(err.statusCode).json({ message: err.message });
+    return res.status(err.statusCode).json({ error: err.message });
   }
 };

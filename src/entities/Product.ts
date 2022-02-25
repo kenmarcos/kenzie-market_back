@@ -1,4 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import CartProduct from "./CartProduct";
+import OrderProduct from "./OrderProduct";
 
 @Entity("products")
 export default class Product {
@@ -11,9 +13,21 @@ export default class Product {
   @Column()
   brand!: string;
 
-  @Column()
+  @Column({ type: "float" })
   price!: number;
 
   @Column()
   description!: string;
+
+  @Column({ type: "int" })
+  stock!: number;
+
+  @Column({ default: "true" })
+  isAvailable!: boolean;
+
+  @OneToMany(() => CartProduct, (cartProduct) => cartProduct.product)
+  cartsProducts!: CartProduct[];
+
+  @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.product)
+  ordersProducts!: OrderProduct[];
 }

@@ -7,5 +7,6 @@ const router = express.Router();
 
 export const loginRouter = () => {
   router.post("", validate(loginSchema), login);
+
   return router;
 };

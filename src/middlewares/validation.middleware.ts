@@ -7,7 +7,10 @@ export const validate =
     const body = req.body;
 
     try {
-      await schema.validate(body, { abortEarly: false });
+      req.body = await schema.validate(body, {
+        abortEarly: false,
+        stripUnknown: true,
+      });
       return next();
     } catch (e: any) {
       return res.status(422).json({ message: e.errors });

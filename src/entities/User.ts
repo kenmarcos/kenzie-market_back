@@ -5,8 +5,10 @@ import {
   PrimaryGeneratedColumn,
   BeforeInsert,
   OneToOne,
+  OneToMany,
 } from "typeorm";
 import Cart from "./Cart";
+import Order from "./Order";
 
 @Entity("users")
 export default class User {
@@ -25,17 +27,20 @@ export default class User {
   @Column()
   phone!: string;
 
-  @Column()
+  @Column({ default: false })
   isAdm!: boolean;
 
   @Column({ select: false })
   password!: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, select: false })
   recPassToken!: string;
 
-  @OneToOne(() => Cart, (cart) => cart.user)
+  @OneToOne(() => Cart, (cart) => cart.owner)
   cart!: Cart;
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders!: Order[];
 
   @BeforeInsert()
   hashPassword() {

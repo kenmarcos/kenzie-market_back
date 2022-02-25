@@ -25,9 +25,13 @@ export const createToken = async (body: LoginBody) => {
     throw new ErrorHandler(401, "Wrong password");
   }
 
-  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, {
-    expiresIn: "24h",
-  });
+  const token = jwt.sign(
+    { idLogged: user.id },
+    process.env.JWT_SECRET as string,
+    {
+      expiresIn: "24h",
+    }
+  );
 
   return token;
 };

@@ -2,12 +2,12 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToOne,
-  ManyToMany,
-  JoinTable,
   JoinColumn,
+  OneToMany,
 } from "typeorm";
 import User from "./User";
-import Product from "./Product";
+import Order from "./Order";
+import CartProduct from "./CartProduct";
 
 @Entity("carts")
 export default class Cart {
@@ -16,11 +16,11 @@ export default class Cart {
 
   @OneToOne(() => User, (user) => user.cart)
   @JoinColumn()
-  user!: User;
+  owner!: User;
 
-  @ManyToMany(() => Product, {
-    eager: true,
-  })
-  @JoinTable()
-  products!: Product[];
+  @OneToMany(() => CartProduct, (cartProduct) => cartProduct.cart)
+  cartsProducts!: CartProduct[];
+
+  @OneToMany(() => Order, (order) => order.cart)
+  orders!: Order[];
 }
