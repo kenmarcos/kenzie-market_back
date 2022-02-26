@@ -10,7 +10,7 @@ export default class CartProduct {
   @Column({ type: "int" })
   productQuantity!: number;
 
-  @ManyToOne(() => Product, (product) => product.cartsProducts)
+  @ManyToOne(() => Product, (product) => product.cartsProducts, { eager: true })
   product!: Product;
 
   @ManyToOne(() => Cart, (cart) => cart.cartsProducts)

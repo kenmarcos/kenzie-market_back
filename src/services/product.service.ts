@@ -23,7 +23,12 @@ export const createProduct = async (
     throw new ErrorHandler(401, "unauthorized");
   }
 
-  const product = productRepository.create({ ...body });
+  let isAvailable = true;
+  if (body.stock === 0) {
+    isAvailable = false;
+  }
+
+  const product = productRepository.create({ ...body, isAvailable });
 
   const newProduct = await productRepository.save(product);
 

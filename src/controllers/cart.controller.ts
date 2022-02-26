@@ -1,14 +1,17 @@
 import {
   addProductToCart,
   listCarts,
-  retrieveCart,
+  findCart,
   removeProductFromCart,
 } from "./../services/cart.service";
 import { Request, Response, NextFunction } from "express";
 
 export const add = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const cart = await addProductToCart(req.body.productId, req.user);
+    const { idLogged, body } = req;
+
+    const cart = await addProductToCart(idLogged, body);
+
     return res.json({ cart });
   } catch (e) {
     next(e);
@@ -16,17 +19,27 @@ export const add = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const list = async (req: Request, res: Response, next: NextFunction) => {
-  const carts = await listCarts();
-  return res.json({ carts });
+  try {
+    const { idLogged } = req;
+
+    const carts = await listCarts(idLogged);
+
+    return res.json({ carts });
+  } catch (e) {
+    next(e);
+  }
 };
 
-export const retrieve = async (
+export const listOne = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const cart = await retrieveCart(req.params.id);
+    const { idLogged } = req;
+    const { id } = req.params;
+
+    const cart = await findCart(idLogged, id);
     return res.json({ cart });
   } catch (e) {
     next(e);
@@ -39,7 +52,11 @@ export const remove = async (
   next: NextFunction
 ) => {
   try {
-    await removeProductFromCart(req.params.product_id, req.body.cartId);
+    const { idLogged, body } = req;
+    const { product_id } = req.params;
+
+    await removeProductFromCart(idLogged, body, product_id);
+
     return res.sendStatus(204);
   } catch (e) {
     next(e);

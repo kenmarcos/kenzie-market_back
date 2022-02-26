@@ -61,5 +61,9 @@ export const findUser = async (idLogged: string, userId: string) => {
 
   const user = await userRepository.findOne(userId);
 
+  if (!user) {
+    throw new ErrorHandler(404, "user not found");
+  }
+
   return user;
 };

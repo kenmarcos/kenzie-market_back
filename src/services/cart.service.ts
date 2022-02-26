@@ -1,6 +1,7 @@
-// import { getRepository } from "typeorm";
-// import { Cart, Product } from "../entities";
-// import ErrorHandler from "../errors/errorHandler";
+import { getRepository } from "typeorm";
+import { Cart, Product, User } from "../entities";
+import ErrorHandler from "../errors/errorHandler";
+import CartProduct from "../entities/CartProduct";
 
 // interface IUser {
 //   id: string;
@@ -12,59 +13,150 @@
 //   cart: { id: string };
 // }
 
-// export const addProductToCart = async (productId: string, user: IUser) => {
-//   const cartRepository = getRepository(Cart);
-//   const productRepository = getRepository(Product);
+export const addProductToCart = async (
+  idLogged: string,
+  body: { productId: string }
+) => {
+  const { productId } = body;
 
-//   const cart = await cartRepository.findOne({ user: user });
-//   const product = await productRepository.findOne(productId);
+  const cartRepository = getRepository(Cart);
+  const productRepository = getRepository(Product);
+  const cartProductRepository = getRepository(CartProduct);
 
-//   if (!product) {
-//     throw new ErrorHandler(404, "Product not found");
-//   }
+  const cart = await cartRepository.findOne({ where: { owner: idLogged } });
+  const productToAdd = await productRepository.findOne(productId);
+  const cartsProductsExist = await cartProductRepository.find({
+    where: { cart },
+    relations: ["product"],
+  });
 
-//   if (cart?.products.some((product) => product.id === productId)) {
-//     throw new ErrorHandler(409, "This product is already in the cart");
-//   }
+  if (!productToAdd) {
+    throw new ErrorHandler(404, "product not found");
+  }
 
-//   cart?.products.push(product);
-//   await cartRepository.save(cart as Cart);
+  if (!productToAdd.isAvailable) {
+    throw new ErrorHandler(400, "product unavailable");
+  }
 
-//   return cart;
-// };
+  if (
+    !cartsProductsExist.some(
+      (cartProduct) => cartProduct.product.id === productToAdd.id
+    )
+  ) {
+    const cartProduct = cartProductRepository.create({
+      productQuantity: 1,
+      product: productToAdd,
+      cart,
+    });
 
-// export const listCarts = async () => {
-//   const cartRepository = getRepository(Cart);
-//   const carts = cartRepository.find();
-//   return carts;
-// };
+    await cartProductRepository.save(cartProduct);
+  } else {
+    const cartProduct = await cartProductRepository.findOne({
+      product: productToAdd,
+    });
+    if (cartProduct) {
+      cartProductRepository.merge(cartProduct, {
+        productQuantity: (cartProduct.productQuantity += 1),
+      });
+      await cartProductRepository.save(cartProduct);
+    }
+  }
+  productRepository.merge(productToAdd, { stock: (productToAdd.stock -= 1) });
+  const product = await productRepository.save(productToAdd);
 
-// export const retrieveCart = async (cartId: string) => {
-//   const cartRepository = getRepository(Cart);
-//   const cart = await cartRepository.findOne(cartId);
-//   if (!cart) {
-//     throw new ErrorHandler(404, "Cart not found");
-//   }
-//   return cart;
-// };
+  if (product.stock === 0) {
+    await productRepository.update(product.id, { isAvailable: false });
+  }
 
-// export const removeProductFromCart = async (
-//   productId: string,
-//   cartId: string
-// ) => {
-//   const cartRepository = getRepository(Cart);
-//   const productRepository = getRepository(Product);
+  const updatedCart = cartRepository.findOne(cart?.id, {
+    relations: ["cartsProducts"],
+  });
 
-//   const cart = await cartRepository.findOne(cartId);
-//   const product = await productRepository.findOne(productId);
+  return updatedCart;
+};
 
-//   if (!product) {
-//     throw new ErrorHandler(404, "Product not found");
-//   }
+export const listCarts = async (idLogged: string) => {
+  const userRepository = getRepository(User);
+  const cartRepository = getRepository(Cart);
 
-//   cart?.products.splice(
-//     cart.products.findIndex((product) => product.id === productId)
-//   );
+  const userLogged = await userRepository.findOne(idLogged);
 
-//   await cartRepository.save(cart as Cart);
-// };
+  if (!userLogged?.isAdm) {
+    throw new ErrorHandler(401, "unauthorized");
+  }
+
+  const carts = cartRepository.find({
+    join: {
+      alias: "carts",
+      leftJoinAndSelect: {
+        cartsProducts: "carts.cartsProducts",
+        products: "cartsProducts.product",
+      },
+    },
+  });
+
+  return carts;
+};
+
+export const findCart = async (idLogged: string, cartId: string) => {
+  const userRepository = getRepository(User);
+  const cartRepository = getRepository(Cart);
+
+  const userLogged = await userRepository.findOne(idLogged, {
+    relations: ["cart"],
+  });
+
+  if (!userLogged?.isAdm && userLogged?.cart.id !== cartId) {
+    throw new ErrorHandler(401, "missing admin permission");
+  }
+
+  const cart = await cartRepository.findOne(cartId, {
+    join: {
+      alias: "carts",
+      leftJoinAndSelect: {
+        cartsProducts: "carts.cartsProducts",
+        products: "cartsProducts.product",
+      },
+    },
+  });
+
+  if (!cart) {
+    throw new ErrorHandler(404, "cart not found");
+  }
+
+  return cart;
+};
+
+export const removeProductFromCart = async (
+  idLogged: string,
+  body: { cartId: string },
+  productId: string
+) => {
+  const { cartId } = body;
+
+  const userRepository = getRepository(User);
+  const cartRepository = getRepository(Cart);
+  const productRepository = getRepository(Product);
+  const cartProductRepository = getRepository(CartProduct);
+
+  const userLogged = await userRepository.findOne(idLogged, {
+    relations: ["cart"],
+  });
+
+  if (!userLogged?.isAdm && userLogged?.cart.id !== cartId) {
+    throw new ErrorHandler(401, "missing admin permission");
+  }
+
+  const cart = await cartRepository.findOne(cartId);
+  const productToRemove = await productRepository.findOne(productId);
+
+  if (!productToRemove) {
+    throw new ErrorHandler(404, "product not found");
+  }
+
+  const cartsProductsExit = await cartProductRepository.find({
+    where: { cart },
+  });
+
+  console.log(cartsProductsExit);
+};
