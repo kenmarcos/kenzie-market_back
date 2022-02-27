@@ -25,7 +25,7 @@ export const addProductToCart = async (
 
   const cart = await cartRepository.findOne({ where: { owner: idLogged } });
   const productToAdd = await productRepository.findOne(productId);
-  const cartsProductsExist = await cartProductRepository.find({
+  const cartsProducts = await cartProductRepository.find({
     where: { cart },
     relations: ["product"],
   });
@@ -38,11 +38,11 @@ export const addProductToCart = async (
     throw new ErrorHandler(400, "product unavailable");
   }
 
-  if (
-    !cartsProductsExist.some(
-      (cartProduct) => cartProduct.product.id === productToAdd.id
-    )
-  ) {
+  const productInCart = cartsProducts.some(
+    (cartProduct) => cartProduct.product.id === productToAdd.id
+  );
+
+  if (!productInCart) {
     const cartProduct = cartProductRepository.create({
       productQuantity: 1,
       product: productToAdd,
@@ -68,7 +68,7 @@ export const addProductToCart = async (
     await productRepository.update(product.id, { isAvailable: false });
   }
 
-  const updatedCart = cartRepository.findOne(cart?.id, {
+  const updatedCart = await cartRepository.findOne(cart?.id, {
     relations: ["cartsProducts"],
   });
 
@@ -85,7 +85,7 @@ export const listCarts = async (idLogged: string) => {
     throw new ErrorHandler(401, "unauthorized");
   }
 
-  const carts = cartRepository.find({
+  const carts = await cartRepository.find({
     join: {
       alias: "carts",
       leftJoinAndSelect: {
@@ -154,9 +154,30 @@ export const removeProductFromCart = async (
     throw new ErrorHandler(404, "product not found");
   }
 
-  const cartsProductsExit = await cartProductRepository.find({
+  const cartsProducts = await cartProductRepository.find({
     where: { cart },
   });
 
-  console.log(cartsProductsExit);
+  const productInCart = cartsProducts.some(
+    (cartProduct) => cartProduct.product.id === productToRemove.id
+  );
+
+  if (!productInCart) {
+    throw new ErrorHandler(400, "product is not in cart");
+  }
+
+  cartsProducts.map(async (cartProduct) => {
+    if (cartProduct.product.id === productToRemove.id) {
+      if (cartProduct.productQuantity > 1) {
+        await cartProductRepository.update(cartProduct.id, {
+          productQuantity: cartProduct.productQuantity - 1,
+        });
+      } else {
+        await cartProductRepository.delete(cartProduct.id);
+      }
+      await productRepository.update(cartProduct.product.id, {
+        stock: cartProduct.product.stock + 1,
+      });
+    }
+  });
 };
