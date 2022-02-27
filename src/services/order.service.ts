@@ -1,67 +1,84 @@
-// import { getRepository } from "typeorm";
-// import { Order, Cart } from "../entities";
-// import ErrorHandler from "../errors/errorHandler";
-// import { transport, mailOptions } from "./email.service";
+import { getRepository } from "typeorm";
+import { Order, Cart, CartProduct, OrderProduct, User } from "../entities";
+import ErrorHandler from "../errors/errorHandler";
+import { transport, mailOptions } from "./email.service";
 
-// interface IUser {
-//   id: string;
-//   name: string;
-//   cpf: string;
-//   email: string;
-//   phone: string;
-//   isAdm: boolean;
-//   cart: { id: string };
-// }
+export const buyOrder = async (idLogged: string) => {
+  const userRepository = getRepository(User);
+  const cartRepository = getRepository(Cart);
+  const cartProductRepository = getRepository(CartProduct);
+  const orderRepository = getRepository(Order);
+  const orderProductRepository = getRepository(OrderProduct);
 
-// export const buyOrder = async (cartId: string, user: IUser) => {
-//   const { name, email } = user;
+  const user = await userRepository.findOne(idLogged);
 
-//   const cartRepository = getRepository(Cart);
-//   const orderRepository = getRepository(Order);
+  const cart = await cartRepository.findOne({
+    where: { owner: idLogged },
+    relations: ["owner"],
+  });
 
-//   const cart = await cartRepository.findOne(cartId);
-//   if (!cart) {
-//     throw new ErrorHandler(404, "Cart not found");
-//   }
+  const cartsProducts = await cartProductRepository.find({
+    where: { cart },
+  });
 
-//   const total = cart.products.reduce((acc, product) => {
-//     return acc + product.price;
-//   }, 0);
+  let total = 0;
+  cartsProducts.map((cartProduct) => {
+    total = total + cartProduct.productQuantity * cartProduct.product.price;
+  });
 
-//   const order = new Order();
-//   order.cart = cart;
-//   order.value = total;
-//   await orderRepository.save(order);
+  const order = orderRepository.create({
+    total,
+    cart,
+    user: (cart as Cart).owner,
+  });
 
-//   const { cart: cartOrder, ...orderWithoutCart } = order;
+  await orderRepository.save(order);
 
-//   const orderCopy = { ...order.cart, ...orderWithoutCart };
+  for (const cartProduct of cartsProducts) {
+    const orderProduct = orderProductRepository.create({
+      productQuantity: cartProduct.productQuantity,
+      product: cartProduct.product,
+      order,
+    });
 
-//   const options = mailOptions(
-//     "no-reply@kenziemarket.com",
-//     [email],
-//     "Pedido Realizado!",
-//     "buy",
-//     {
-//       name: user.name,
-//       products: cart.products,
-//       total: total,
-//     }
-//   );
+    await orderProductRepository.save(orderProduct);
+  }
 
-//   transport.sendMail(options, (err, info) => {
-//     if (err) {
-//       throw new ErrorHandler(500, "Error while sending the email");
-//     } else {
-//       console.log(info);
-//     }
-//   });
+  const ordersProducts = await orderProductRepository.find({
+    where: { order },
+    relations: ["product"],
+  });
 
-//   cart.products = [];
-//   await cartRepository.save(cart);
+  const options = mailOptions(
+    "no-reply@kenziemarket.com",
+    [(user as User).email],
+    "Pedido Realizado!",
+    "buy",
+    {
+      name: (user as User).name,
+      cartsProducts: cartsProducts,
+      total: total,
+    }
+  );
 
-//   return orderCopy;
-// };
+  transport.sendMail(options, (err, info) => {
+    if (err) {
+      throw new ErrorHandler(500, "Error while sending the email");
+    }
+  });
+
+  const newOrder = orderRepository.findOne({
+    join: {
+      alias: "orders",
+      leftJoinAndSelect: {
+        ordersProducts: "orders.ordersProducts",
+        products: "ordersProducts.product",
+      },
+    },
+  });
+
+  return newOrder;
+};
 
 // export const listOrders = async () => {
 //   const orderRepository = getRepository(Order);

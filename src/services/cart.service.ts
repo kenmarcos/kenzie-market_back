@@ -3,16 +3,6 @@ import { Cart, Product, User } from "../entities";
 import ErrorHandler from "../errors/errorHandler";
 import CartProduct from "../entities/CartProduct";
 
-// interface IUser {
-//   id: string;
-//   name: string;
-//   cpf: string;
-//   email: string;
-//   phone: string;
-//   isAdm: boolean;
-//   cart: { id: string };
-// }
-
 export const addProductToCart = async (
   idLogged: string,
   body: { productId: string }
@@ -157,6 +147,10 @@ export const removeProductFromCart = async (
   const cartsProducts = await cartProductRepository.find({
     where: { cart },
   });
+
+  if (cartsProducts.length === 0) {
+    throw new ErrorHandler(400, "cart is empty");
+  }
 
   const productInCart = cartsProducts.some(
     (cartProduct) => cartProduct.product.id === productToRemove.id

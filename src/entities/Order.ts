@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from "typeorm";
 import User from "./User";
 import Cart from "./Cart";
 import OrderProduct from "./OrderProduct";
@@ -17,6 +23,6 @@ export default class Order {
   @ManyToOne(() => User, (user) => user.orders)
   user!: User;
 
-  @ManyToOne(() => OrderProduct, (orderProduct) => orderProduct.order)
+  @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.order)
   ordersProducts!: OrderProduct[];
 }

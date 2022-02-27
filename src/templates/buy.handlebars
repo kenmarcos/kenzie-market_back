@@ -12,18 +12,20 @@
     <thead>
       <tr>
         <th>Item</th>
+        <th>Quantidade</th>
         <th>Preço</th>
       </tr>
     </thead>
-    {{#each products}}
+    {{#each cartsProducts}}
       <tr>
-        <td>{{this.name}}</td>
-        <td>R${{this.price}}</td>
+        <td>{{this.product.name}}</td>
+        <td>{{this.productQuantity}}</td>
+        <td>R${{this.product.price}}</td>
       </tr>
     {{/each}}
     <tfoot>
       <tr>
-        <td style="font-size: 14px;">TOTAL</td>
+        <td colspan="2" style="font-size: 14px;">TOTAL</td>
         <td>R${{total}}</td>
       </tr>
     </tfoot>
