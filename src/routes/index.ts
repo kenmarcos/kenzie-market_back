@@ -5,7 +5,7 @@ import { productRouter } from "./product.router";
 import { cartRouter } from "./cart.router";
 import { buyRouter } from "./buy.router";
 import { emailToUserRouter } from "./emailToUser.router";
-// import { recPassRouter } from "./recPass.router";
+import { recPassRouter } from "./recPass.router";
 
 export const routes = (app: Express) => {
   app.use("/user", userRouter());
@@ -14,5 +14,5 @@ export const routes = (app: Express) => {
   app.use("/cart", cartRouter());
   app.use("/buy", buyRouter());
   app.use("/email", emailToUserRouter());
-  // app.use("", recPassRouter());
+  app.use("", recPassRouter());
 };

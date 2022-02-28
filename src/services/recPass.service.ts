@@ -1,67 +1,72 @@
-// import bcrypt from "bcrypt";
-// import jwt from "jsonwebtoken";
-// import { getRepository } from "typeorm";
-// import User from "../entities/User";
-// import ErrorHandler from "../errors/errorHandler";
-// import { transport, mailOptions } from "./email.service";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { getRepository } from "typeorm";
+import User from "../entities/User";
+import ErrorHandler from "../errors/errorHandler";
+import { transport, mailOptions } from "./email.service";
 
-// interface ChangePassBody {
-//   email: string;
-//   token: string;
-//   password: string;
-// }
+interface ChangePassBody {
+  email: string;
+  verificationCode: string;
+  newPassword: string;
+}
 
-// export const sendPassRecToken = async (email: string) => {
-//   const userRepository = getRepository(User);
-//   const user = await userRepository.findOne({ email: email });
+export const sendPassRecToken = async (body: { email: string }) => {
+  const { email } = body;
 
-//   if (!user) {
-//     throw new ErrorHandler(404, "E-mail not found");
-//   }
+  const userRepository = getRepository(User);
+  const user = await userRepository.findOne({ email });
 
-//   const recPassToken = jwt.sign({ user }, process.env.JWT_SECRET as string, {
-//     expiresIn: 300,
-//   });
+  if (!user) {
+    throw new ErrorHandler(404, "email not found");
+  }
 
-//   user.recPassToken = recPassToken;
+  const recPassToken = jwt.sign({ user }, process.env.JWT_SECRET as string, {
+    expiresIn: "24h",
+  });
 
-//   const options = mailOptions(
-//     "no-reply@kenziemarket.com",
-//     [email],
-//     "Solicitação de recuperação de senha",
-//     "recPAssToken",
-//     {
-//       name: user.name,
-//       recPassToken: recPassToken,
-//     }
-//   );
+  user.recPassToken = recPassToken;
 
-//   transport.sendMail(options, (err, info) => {
-//     if (err) {
-//       throw new ErrorHandler(500, "Error while sending the email");
-//     } else {
-//       console.log(info);
-//     }
-//   });
+  const options = mailOptions(
+    "no-reply@kenziemarket.com",
+    [email],
+    "Solicitação de recuperação de senha",
+    "recPAssToken",
+    {
+      name: user.name,
+      recPassToken: recPassToken,
+    }
+  );
 
-//   await userRepository.save(user);
-// };
+  transport.sendMail(options, (err, info) => {
+    if (err) {
+      throw new ErrorHandler(500, "error while sending the email");
+    }
+  });
 
-// export const changePass = async (body: ChangePassBody) => {
-//   const { email, password, token } = body;
+  await userRepository.save(user);
+};
 
-//   const userRepository = getRepository(User);
-//   const user = await userRepository.findOne({ email: email });
+export const changePass = async (body: ChangePassBody) => {
+  const { email, newPassword, verificationCode } = body;
 
-//   if (!user) {
-//     throw new ErrorHandler(404, "E-mail not found");
-//   }
+  const userRepository = getRepository(User);
+  const user = await userRepository.findOne(
+    { email: email },
+    { select: ["id", "recPassToken"] }
+  );
 
-//   if (token !== user.recPassToken) {
-//     throw new ErrorHandler(403, "Invalid token");
-//   }
+  if (!user) {
+    throw new ErrorHandler(404, "email not found");
+  }
 
-//   user.password = bcrypt.hashSync(password, 10);
-//   user.recPassToken = "";
-//   await userRepository.save(user);
-// };
+  console.log(verificationCode !== user.recPassToken);
+
+  if (verificationCode !== user.recPassToken) {
+    throw new ErrorHandler(403, "invalid token");
+  }
+
+  user.password = bcrypt.hashSync(newPassword, 10);
+  user.recPassToken = "";
+  await userRepository.update(user.id, { ...user });
+};

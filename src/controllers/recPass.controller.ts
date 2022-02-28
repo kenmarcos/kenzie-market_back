@@ -3,9 +3,13 @@ import { sendPassRecToken, changePass } from "../services/recPass.service";
 
 export const send = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    await sendPassRecToken(req.body.email);
+    const { body } = req;
+
+    await sendPassRecToken(body);
+
     return res.json({
-      message: "Email with code to change password was sent by email",
+      message:
+        "email with verification code to change password was sent by email",
     });
   } catch (e) {
     next(e);
@@ -18,8 +22,11 @@ export const change = async (
   next: NextFunction
 ) => {
   try {
-    await changePass(req.body);
-    return res.json({ message: "Password changed" });
+    const { body } = req;
+
+    await changePass(body);
+
+    return res.json({ message: "password changed successfully" });
   } catch (e) {
     next(e);
   }
