@@ -9,4 +9,18 @@ const devEnv = {
   logging: true,
 };
 
-module.exports = devEnv;
+const prodEnv = {
+  type: "postgres",
+  url: process.env.DATABASE_URL,
+  entities: ["./dist/entities/**/*.js"],
+  migrations: ["./dist/database/migrations/*.js"],
+  cli: {
+    migrationsDir: "./dist/database/migrations",
+  },
+  ssl:
+    process.env.NODE_ENV === "production"
+      ? { rejectUnauthorized: false }
+      : false,
+};
+
+module.exports = process.env.NODE_ENV === "production" ? prodEnv : devEnv;
