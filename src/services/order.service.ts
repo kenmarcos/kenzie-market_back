@@ -63,9 +63,11 @@ export const buyOrder = async (idLogged: string) => {
 
   transport.sendMail(options, (err, info) => {
     if (err) {
-      throw new ErrorHandler(500, "Error while sending the email");
+      throw new ErrorHandler(500, "error while sending the email");
     }
   });
+
+  await cartProductRepository.delete({ cart });
 
   const newOrder = orderRepository.findOne({
     join: {
@@ -80,17 +82,58 @@ export const buyOrder = async (idLogged: string) => {
   return newOrder;
 };
 
-// export const listOrders = async () => {
-//   const orderRepository = getRepository(Order);
-//   const orders = orderRepository.find();
-//   return orders;
-// };
+export const listOrders = async (idLogged: string) => {
+  const userRepository = getRepository(User);
+  const orderRepository = getRepository(Order);
 
-// export const retrieveOrder = async (orderId: string) => {
-//   const orderRepository = getRepository(Order);
-//   const order = await orderRepository.findOne(orderId);
-//   if (!order) {
-//     throw new ErrorHandler(404, "Buy not found");
-//   }
-//   return order;
-// };
+  const userLogged = await userRepository.findOne(idLogged);
+
+  if (!userLogged?.isAdm) {
+    throw new ErrorHandler(401, "unauthorized");
+  }
+
+  const orders = orderRepository.find({
+    relations: ["user"],
+    join: {
+      alias: "orders",
+      leftJoinAndSelect: {
+        ordersProducts: "orders.ordersProducts",
+        products: "ordersProducts.product",
+      },
+    },
+  });
+
+  return orders;
+};
+
+export const findOrder = async (idLogged: string, orderId: string) => {
+  const userRepository = getRepository(User);
+  const orderRepository = getRepository(Order);
+
+  const userLogged = await userRepository.findOne(idLogged, {
+    relations: ["orders"],
+  });
+
+  if (
+    !userLogged?.isAdm &&
+    (userLogged?.orders.some((order) => order.id !== orderId) ||
+      userLogged?.orders.length === 0)
+  ) {
+    throw new ErrorHandler(401, "missing admin permission");
+  }
+
+  const order = await orderRepository.findOne(orderId, {
+    join: {
+      alias: "orders",
+      leftJoinAndSelect: {
+        ordersProducts: "orders.ordersProducts",
+        products: "ordersProducts.product",
+      },
+    },
+  });
+
+  if (!order) {
+    throw new ErrorHandler(404, "order not found");
+  }
+  return order;
+};

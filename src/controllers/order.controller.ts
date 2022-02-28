@@ -1,8 +1,4 @@
-import {
-  buyOrder,
-  // listOrders,
-  // retrieveOrder,
-} from "./../services/order.service";
+import { buyOrder, listOrders, findOrder } from "./../services/order.service";
 import { Request, Response, NextFunction } from "express";
 
 export const buy = async (req: Request, res: Response, next: NextFunction) => {
@@ -17,20 +13,31 @@ export const buy = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-// export const list = async (req: Request, res: Response, next: NextFunction) => {
-//   const orders = await listOrders();
-//   return res.json({ orders });
-// };
+export const list = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { idLogged } = req;
 
-// export const retrieve = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     const order = await retrieveOrder(req.params.id);
-//     return res.json({ order });
-//   } catch (e) {
-//     next(e);
-//   }
-// };
+    const orders = await listOrders(idLogged);
+
+    return res.json({ orders });
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const listOne = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { idLogged } = req;
+    const { id } = req.params;
+
+    const order = await findOrder(idLogged, id);
+
+    return res.json({ order });
+  } catch (e) {
+    next(e);
+  }
+};
