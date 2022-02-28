@@ -1,37 +1,35 @@
-// import { getRepository } from "typeorm";
-// import { transport, mailOptions } from "../services/email.service";
-// import User from "../entities/User";
-// import ErrorHandler from "../errors/errorHandler";
+import { getRepository } from "typeorm";
+import { transport, mailOptions } from "../services/email.service";
+import User from "../entities/User";
+import ErrorHandler from "../errors/errorHandler";
 
-// interface SendEmailToUserBody {
-//   to: string;
-//   subject: string;
-//   text: string;
-// }
+interface SendEmailToUserBody {
+  to: string[];
+  subject: string;
+  text: string;
+}
 
-// export const sendEmailToUser = async (
-//   from: string,
-//   body: SendEmailToUserBody
-// ) => {
-//   const { to, subject, text } = body;
+export const sendEmailToUser = async (
+  idLogged: string,
+  body: SendEmailToUserBody
+) => {
+  const { to, subject, text } = body;
 
-//   const userRepository = getRepository(User);
-//   const user = await userRepository.findOne({ email: to });
+  const userRepository = getRepository(User);
+  const userLogged = await userRepository.findOne(idLogged);
 
-//   if (!user) {
-//     throw new ErrorHandler(400, "User not found");
-//   }
+  if (!userLogged?.isAdm) {
+    throw new ErrorHandler(401, "unauthorized");
+  }
 
-//   const options = mailOptions(from, [to], subject, "emailToUser", {
-//     name: user.name,
-//     message: text,
-//   });
+  const options = mailOptions(userLogged.email, to, subject, "emailToUser", {
+    message: text,
+    name: userLogged.name,
+  });
 
-//   transport.sendMail(options, (err, info) => {
-//     if (err) {
-//       throw new ErrorHandler(500, "Error while sending the email");
-//     } else {
-//       console.log(info);
-//     }
-//   });
-// };
+  transport.sendMail(options, (err, info) => {
+    if (err) {
+      throw new ErrorHandler(500, "error while sending the email");
+    }
+  });
+};
