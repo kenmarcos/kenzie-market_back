@@ -63,7 +63,7 @@ export const changePass = async (body: ChangePassBody) => {
   console.log(verificationCode !== user.recPassToken);
 
   if (verificationCode !== user.recPassToken) {
-    throw new ErrorHandler(403, "invalid token");
+    throw new ErrorHandler(403, "invalid verification code");
   }
 
   user.password = bcrypt.hashSync(newPassword, 10);

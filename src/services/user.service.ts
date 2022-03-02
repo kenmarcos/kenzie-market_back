@@ -22,10 +22,6 @@ export const createUser = async (body: CreateUserBody) => {
 
     const newUser = await userRepository.findOne(user.id);
 
-    if (!newUser) {
-      throw new ErrorHandler(404, "User not found");
-    }
-
     const cart = cartRepository.create({ owner: newUser });
 
     await cartRepository.save(cart);

@@ -1,0 +1,1930 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Kenzie Market",
+    "description": "Basic e-commerce system with shopping cart.",
+    "version": "1.0.0"
+  },
+
+  "servers": [
+    {
+      "url": "http://localhost:3000/api-documentation",
+      "description": "Local Server"
+    },
+    {
+      "url": "https://kenzie-market-marcos.herokuapp.com/api-documentation",
+      "description": "Production Server"
+    }
+  ],
+
+  "paths": {
+    "/user": {
+      "post": {
+        "description": "Register a user. A user can be a customer type or an administrator type.",
+        "tags": ["User"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              },
+              "example": {
+                "value": {
+                  "name": "John Doe",
+                  "cpf": "417.155.008-31",
+                  "email": "john_doe@mail.com",
+                  "phone": "(11)94321-1234",
+                  "isAdm": true,
+                  "password": "1234"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "CREATED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": "0a375c2d-787e-44b6-b1c9-0247de3245d0",
+                  "name": "John Doe",
+                  "cpf": "417.155.008-31",
+                  "email": "john_doe@mail.com",
+                  "phone": "(11)94321-1234",
+                  "isAdm": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "email already registered": {
+                    "value": {
+                      "error": "Key (email)=(john_doe@mail.com) already exists."
+                    }
+                  },
+                  "cpf already registered": {
+                    "value": {
+                      "error": "Key (cpf)=(417.155.008-31) already exists."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "UNPROCESSABLE ENTITY",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error422"
+                },
+                "examples": {
+                  "one required field missing": {
+                    "value": {
+                      "error": ["name is required"]
+                    }
+                  },
+                  "multiples required fields missing": {
+                    "value": {
+                      "error": [
+                        "name is required",
+                        "cpf is required",
+                        "password is required"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{}]
+      },
+      "get": {
+        "description": "List all users. Only admins can do this action.",
+        "tags": ["User"],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsersList"
+                },
+                "example": [
+                  {
+                    "id": "0a375c2d-787e-44b6-b1c9-0247de3245d0",
+                    "name": "John Doe",
+                    "cpf": "417.155.008-31",
+                    "email": "john_doe@mail.com",
+                    "phone": "(11)94321-1234",
+                    "isAdm": true
+                  },
+                  {
+                    "id": "56973f6c-3cbe-4a78-90a5-f4f50f496a33",
+                    "name": "Marcos",
+                    "cpf": "418.125.080-30",
+                    "email": "marcos@mail.com",
+                    "phone": "(11)94244-2305",
+                    "isAdm": false
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "user is not admin": {
+                    "value": {
+                      "error": "unauthorized"
+                    }
+                  },
+                  "missing authorization headers": {
+                    "value": {
+                      "error": "missing authorization headers"
+                    }
+                  },
+                  "invalid token": {
+                    "value": {
+                      "error": "invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "description": "Login in the application. Generate an authentication token",
+        "tags": ["User"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLogin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "user not found"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "wrong password"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "UNPROCESSABLE ENTITY",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error422"
+                },
+                "examples": {
+                  "one required field missing": {
+                    "value": {
+                      "error": ["email is required"]
+                    }
+                  },
+                  "multiples required fields missing": {
+                    "value": {
+                      "error": ["email is required", "password is required"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{}]
+      }
+    },
+    "/user/{userId}": {
+      "get": {
+        "description": "Select a user by id. Admin can select any user but customer can only select their own user.",
+        "tags": ["User"],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "The user's id.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": "0a375c2d-787e-44b6-b1c9-0247de3245d0",
+                  "name": "John Doe",
+                  "cpf": "417.155.008-31",
+                  "email": "john_doe@mail.com",
+                  "phone": "(11)94321-1234",
+                  "isAdm": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "user not found"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "user is not admin": {
+                    "value": {
+                      "error": "missing admin permission"
+                    }
+                  },
+                  "missing authorization headers": {
+                    "value": {
+                      "error": "missing authorization headers"
+                    }
+                  },
+                  "invalid token": {
+                    "value": {
+                      "error": "invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/product": {
+      "post": {
+        "description": "Register a product. Only admins can do this action.",
+        "tags": ["Product"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Product"
+              },
+              "example": {
+                "name": "Máquina de Lavar Roupa",
+                "brand": "Panasonic",
+                "price": 1800.0,
+                "description": "17 kg",
+                "stock": 0
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "CREATED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                },
+                "example": {
+                  "id": "6beeb613-0576-4a38-8f00-77680f24ee9b",
+                  "name": "Máquina de Lavar Roupa",
+                  "brand": "Panasonic",
+                  "price": 1800,
+                  "description": "17 kg",
+                  "stock": 0,
+                  "isAvailable": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "user is not admin": {
+                    "value": {
+                      "error": "unauthorized"
+                    }
+                  },
+                  "missing authorization headers": {
+                    "value": {
+                      "error": "missing authorization headers"
+                    }
+                  },
+                  "invalid token": {
+                    "value": {
+                      "error": "invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "List all products. Any user can do this action.",
+        "tags": ["Product"],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductsList"
+                },
+                "example": [
+                  {
+                    "id": "6c807b97-4a02-4af8-8184-6b2f4ac2ff74",
+                    "name": "Televisão",
+                    "brand": "Sony",
+                    "price": 1500,
+                    "description": "SmarTV 4K",
+                    "stock": 40,
+                    "isAvailable": true
+                  },
+                  {
+                    "id": "950e06aa-d1d3-4715-aee0-cd86a2771904",
+                    "name": "Iphone",
+                    "brand": "Apple",
+                    "price": 2000,
+                    "description": "SmartPhone Moderno",
+                    "stock": 60,
+                    "isAvailable": true
+                  },
+                  {
+                    "id": "6beeb613-0576-4a38-8f00-77680f24ee9b",
+                    "name": "Máquina de Lavar Roupa",
+                    "brand": "Panasonic",
+                    "price": 1800,
+                    "description": "17 kg",
+                    "stock": 0,
+                    "isAvailable": false
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "security": [{}]
+      }
+    },
+    "/product/{productId}": {
+      "get": {
+        "description": "Select a product by id. Any user can do this action.",
+        "tags": ["Product"],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "description": "The product's id.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                },
+                "example": {
+                  "id": "6c807b97-4a02-4af8-8184-6b2f4ac2ff74",
+                  "name": "Televisão",
+                  "brand": "Sony",
+                  "price": 1500,
+                  "description": "SmarTV 4K",
+                  "stock": 40,
+                  "isAvailable": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "product not found"
+                }
+              }
+            }
+          }
+        },
+        "security": [{}]
+      }
+    },
+
+    "/cart": {
+      "post": {
+        "description": "Add a product to cart. Only logged in users can add the product to the cart.",
+        "tags": ["Cart"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartAddProduct"
+              },
+              "example": {
+                "productId": "6c807b97-4a02-4af8-8184-6b2f4ac2ff74"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                },
+                "example": {
+                  "id": "e5030dad-45f1-4f41-9fc2-23385618c824",
+                  "cartsProducts": [
+                    {
+                      "id": "a563d623-62b2-458f-ad1b-2d42e0c2f338",
+                      "productQuantity": 3,
+                      "product": {
+                        "id": "6c807b97-4a02-4af8-8184-6b2f4ac2ff74",
+                        "name": "Televisão",
+                        "brand": "Sony",
+                        "price": 1500,
+                        "description": "SmarTV 4K",
+                        "stock": 37,
+                        "isAvailable": true
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "product not found"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "product unvailable"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "UNPROCESSABLE ENTITY",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error422"
+                },
+                "example": {
+                  "error": ["productId is required"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missing authorization headers": {
+                    "value": {
+                      "error": "missing authorization headers"
+                    }
+                  },
+                  "invalid token": {
+                    "value": {
+                      "error": "invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "List all carts. Only admins can do this action ",
+        "tags": ["Cart"],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartsList"
+                },
+                "example": [
+                  {
+                    "id": "e5030dad-45f1-4f41-9fc2-23385618c824",
+                    "cartsProducts": [
+                      {
+                        "id": "a563d623-62b2-458f-ad1b-2d42e0c2f338",
+                        "productQuantity": 1,
+                        "product": {
+                          "id": "6c807b97-4a02-4af8-8184-6b2f4ac2ff74",
+                          "name": "Televisão",
+                          "brand": "Sony",
+                          "price": 1500,
+                          "description": "SmarTV 4K",
+                          "stock": 39,
+                          "isAvailable": true
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "76ccd1f1-d914-4493-b893-c9b8b6ae1f33",
+                    "cartsProducts": []
+                  },
+                  {
+                    "id": "de77ec54-4717-4f71-ad66-7a675f354960",
+                    "cartsProducts": []
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "user is not admin": {
+                    "value": {
+                      "error": "unauthorized"
+                    }
+                  },
+                  "missing authorization headers": {
+                    "value": {
+                      "error": "missing authorization headers"
+                    }
+                  },
+                  "invalid token": {
+                    "value": {
+                      "error": "invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cart/{cartId}": {
+      "get": {
+        "description": "Select a cart by id. Admin can select any cart but customer can only select their own cart.",
+        "tags": ["Cart"],
+        "parameters": [
+          {
+            "name": "cartId",
+            "in": "path",
+            "required": true,
+            "description": "The cart's id.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                },
+                "example": {
+                  "id": "e5030dad-45f1-4f41-9fc2-23385618c824",
+                  "cartsProducts": [
+                    {
+                      "id": "a563d623-62b2-458f-ad1b-2d42e0c2f338",
+                      "productQuantity": 1,
+                      "product": {
+                        "id": "6c807b97-4a02-4af8-8184-6b2f4ac2ff74",
+                        "name": "Televisão",
+                        "brand": "Sony",
+                        "price": 1500,
+                        "description": "SmarTV 4K",
+                        "stock": 39,
+                        "isAvailable": true
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "cart not found"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "user is not admin": {
+                    "value": {
+                      "error": "missing admin permission"
+                    }
+                  },
+                  "missing authorization headers": {
+                    "value": {
+                      "error": "missing authorization headers"
+                    }
+                  },
+                  "invalid token": {
+                    "value": {
+                      "error": "invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{}]
+      }
+    },
+    "/cart/{productId}": {
+      "delete": {
+        "description": "Remove a product from cart. Only the user who owns the cart and the admin can perform this action",
+        "tags": ["Cart"],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "description": "The product's id.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartRemoveProduct"
+              },
+              "example": {
+                "carId": "e5030dad-45f1-4f41-9fc2-23385618c824"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "NO CONTENT"
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "non-existent productId": {
+                    "value": {
+                      "error": "product not found"
+                    }
+                  },
+                  "product does not exist in cart": {
+                    "value": {
+                      "error": "product is not in cart"
+                    }
+                  },
+                  "cart is empty": {
+                    "value": {
+                      "error": "cart is empty"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "user is not admin": {
+                    "value": {
+                      "error": "missing admin permission"
+                    }
+                  },
+                  "missing authorization headers": {
+                    "value": {
+                      "error": "missing authorization headers"
+                    }
+                  },
+                  "invalid token": {
+                    "value": {
+                      "error": "invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/buy": {
+      "post": {
+        "description": "Make a purchase of the products in the cart. Only the owner of the cart can complete a purchase and after completion an email with the purchase data must be sent to the user.",
+        "tags": ["Buy"],
+        "responses": {
+          "201": {
+            "description": "CREATED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                },
+                "example": {
+                  "id": "b7a57a21-d2d0-481c-aae1-562de18b185d",
+                  "total": 4500,
+                  "ordersProducts": [
+                    {
+                      "id": "56c7af5a-8b17-4c4b-bb65-d322c72f4efd",
+                      "productQuantity": 3,
+                      "product": {
+                        "id": "f3058490-648b-4020-959c-1d2e80517df3",
+                        "name": "Geladeira",
+                        "brand": "Consul",
+                        "price": 1000,
+                        "description": "Super geladeira",
+                        "stock": 6,
+                        "isAvailable": true
+                      }
+                    },
+                    {
+                      "id": "bff9e62c-1439-48a7-9d3a-370d7968ee90",
+                      "productQuantity": 1,
+                      "product": {
+                        "id": "6c807b97-4a02-4af8-8184-6b2f4ac2ff74",
+                        "name": "Televisão",
+                        "brand": "Sony",
+                        "price": 1500,
+                        "description": "SmarTV 4K",
+                        "stock": 38,
+                        "isAvailable": true
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "missing authorization headers": {
+                    "value": {
+                      "error": "missing authorization headers"
+                    }
+                  },
+                  "invalid token": {
+                    "value": {
+                      "error": "invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "cart is empty"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "error sending order confirmation email"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "List all orders. Only admins can do this action.",
+        "tags": ["Buy"],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdersList"
+                },
+                "example": [
+                  {
+                    "id": "b7a57a21-d2d0-481c-aae1-562de18b185d",
+                    "total": 4500,
+                    "user": {
+                      "id": "0573bb25-8f3a-4837-a64f-4f56f1203066",
+                      "name": "Marcos",
+                      "cpf": "410.155.088-39",
+                      "email": "marcos@mail.com",
+                      "phone": "(11)94231-2965",
+                      "isAdm": true
+                    },
+                    "ordersProducts": [
+                      {
+                        "id": "56c7af5a-8b17-4c4b-bb65-d322c72f4efd",
+                        "productQuantity": 3,
+                        "product": {
+                          "id": "f3058490-648b-4020-959c-1d2e80517df3",
+                          "name": "Geladeira",
+                          "brand": "Consul",
+                          "price": 1000,
+                          "description": "Super geladeira",
+                          "stock": 10,
+                          "isAvailable": true
+                        }
+                      },
+                      {
+                        "id": "bff9e62c-1439-48a7-9d3a-370d7968ee90",
+                        "productQuantity": 1,
+                        "product": {
+                          "id": "6c807b97-4a02-4af8-8184-6b2f4ac2ff74",
+                          "name": "Televisão",
+                          "brand": "Sony",
+                          "price": 1500,
+                          "description": "SmarTV 4K",
+                          "stock": 39,
+                          "isAvailable": true
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "c3ce769e-4cae-4aee-9d7a-1a0c2c038943",
+                    "total": 1500,
+                    "user": {
+                      "id": "56973f6c-3cbe-4a78-90a5-f4f50f496a33",
+                      "name": "Mônica",
+                      "cpf": "410.155.088-30",
+                      "email": "monica@mail.com",
+                      "phone": "(11)94231-2965",
+                      "isAdm": false
+                    },
+                    "ordersProducts": [
+                      {
+                        "id": "52575bc3-4547-4253-a25a-2a3e11daf0b7",
+                        "productQuantity": 1,
+                        "product": {
+                          "id": "6c807b97-4a02-4af8-8184-6b2f4ac2ff74",
+                          "name": "Televisão",
+                          "brand": "Sony",
+                          "price": 1500,
+                          "description": "SmarTV 4K",
+                          "stock": 39,
+                          "isAvailable": true
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "user is not admin": {
+                    "value": {
+                      "error": "unauthorized"
+                    }
+                  },
+                  "missing authorization headers": {
+                    "value": {
+                      "error": "missing authorization headers"
+                    }
+                  },
+                  "invalid token": {
+                    "value": {
+                      "error": "invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/buy/{orderId}": {
+      "get": {
+        "description": "Select a order by id. Admin can select any order but customer can only select their own orders.",
+        "tags": ["Buy"],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "description": "The order's id.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                },
+                "example": {
+                  "id": "b7a57a21-d2d0-481c-aae1-562de18b185d",
+                  "total": 4500,
+                  "ordersProducts": [
+                    {
+                      "id": "56c7af5a-8b17-4c4b-bb65-d322c72f4efd",
+                      "productQuantity": 3,
+                      "product": {
+                        "id": "f3058490-648b-4020-959c-1d2e80517df3",
+                        "name": "Geladeira",
+                        "brand": "Consul",
+                        "price": 1000,
+                        "description": "Super geladeira",
+                        "stock": 10,
+                        "isAvailable": true
+                      }
+                    },
+                    {
+                      "id": "bff9e62c-1439-48a7-9d3a-370d7968ee90",
+                      "productQuantity": 1,
+                      "product": {
+                        "id": "6c807b97-4a02-4af8-8184-6b2f4ac2ff74",
+                        "name": "Televisão",
+                        "brand": "Sony",
+                        "price": 1500,
+                        "description": "SmarTV 4K",
+                        "stock": 39,
+                        "isAvailable": true
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "order not found"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "user is not admin": {
+                    "value": {
+                      "error": "missing admin permission"
+                    }
+                  },
+                  "missing authorization headers": {
+                    "value": {
+                      "error": "missing authorization headers"
+                    }
+                  },
+                  "invalid token": {
+                    "value": {
+                      "error": "invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/email": {
+      "post": {
+        "description": "Send an email to a user. Only admins can perform this action",
+        "tags": ["Email"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/EmailToUser" },
+              "example": {
+                "to": ["marcos@mail.com"],
+                "subject": "Seja bem-vindo(a)",
+                "text": "Um texto qualquer de exemplo."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "email successfully sent"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "UNPROCESSABLE ENTITY",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error422"
+                },
+                "examples": {
+                  "one required field missing": {
+                    "value": {
+                      "error": ["subject is required"]
+                    }
+                  },
+                  "multiples required fields missing": {
+                    "value": {
+                      "error": [
+                        "to is required",
+                        "subject is required",
+                        "text is required"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "user is not admin": {
+                    "value": {
+                      "error": "unauthorized"
+                    }
+                  },
+                  "missing authorization headers": {
+                    "value": {
+                      "error": "missing authorization headers"
+                    }
+                  },
+                  "invalid token": {
+                    "value": {
+                      "error": "invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "error while sending the email"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/recover": {
+      "post": {
+        "description": "Send a validation code for password recovery to the user's email.",
+        "tags": ["Password Recovery"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoveryPassword"
+              },
+              "example": {
+                "email": "marcos@mail.com"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "email with verification code to change password was sent by email"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "email not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "UNPROCESSABLE ENTITY",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error422"
+                },
+                "example": {
+                  "error": ["email is required"]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "error while sending the email"
+                }
+              }
+            }
+          }
+        },
+        "security": [{}]
+      }
+    },
+
+    "/change_password": {
+      "post": {
+        "description": "Change user password. From the validator code that the user receives in his email, the user can change the password by sending the code, the new password and its confirmation in the body of the request.",
+        "tags": ["Password Recovery"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePassword"
+              },
+              "example": {
+                "email": "pedro@mail.com",
+                "newPassword": "pedro",
+                "verificationCode": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjRhMjk3YjctMGE1OC00MDE5LTk3MTctYWViODE1MGViZTlkIiwibmFtZSI6IlBlZHJvIiwiY3BmIjoiNDEwLjE1NS4wODgtMzEiLCJlbWFpbCI6InBlZHJvQG1haWwuY29tIiwicGhvbmUiOiIoMTEpOTQyMzEtMjk2NSIsImlzQWRtIjpmYWxzZX0sImlhdCI6MTY0NjA1OTY3MywiZXhwIjoxNjQ2MTQ2MDczfQ.-EJa7IbNryaOu_NCCOhUiHl2e362KusvPYJZb2tJ9U0"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "password changed successfully"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "invalid verification code"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "email not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "UNPROCESSABLE ENTITY",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error422"
+                },
+                "examples": {
+                  "one required field missing": {
+                    "value": {
+                      "error": ["email is required"]
+                    }
+                  },
+                  "multiples required fields missing": {
+                    "value": {
+                      "error": [
+                        "email is required",
+                        "verificationCode is required"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL SERVER ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "error while sending the email"
+                }
+              }
+            }
+          }
+        },
+        "security": [{}]
+      }
+    }
+  },
+
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Generated with UUID V4",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "cpf": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "isAdm": {
+            "type": "boolean"
+          },
+          "password": {
+            "type": "string",
+            "description": "Hashed with BCrypt",
+            "writeOnly": true
+          }
+        }
+      },
+
+      "UsersList": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Generated with UUID V4",
+              "readOnly": true
+            },
+            "name": {
+              "type": "string"
+            },
+            "cpf": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "isAdm": {
+              "type": "boolean"
+            }
+          }
+        }
+      },
+
+      "UserLogin": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          },
+          "stock": {
+            "type": "number"
+          },
+          "isAvailable": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        }
+      },
+
+      "ProductsList": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Generated with UUID V4",
+              "readOnly": true
+            },
+            "name": {
+              "type": "string"
+            },
+            "brand": {
+              "type": "string"
+            },
+            "price": {
+              "type": "number"
+            },
+            "description": {
+              "type": "string"
+            },
+            "stock": {
+              "type": "number"
+            },
+            "isAvailable": {
+              "type": "boolean",
+              "readOnly": true
+            }
+          }
+        }
+      },
+
+      "CartAddProduct": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string"
+          }
+        }
+      },
+
+      "Cart": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "cartsProducts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "readOnly": true
+                },
+                "productQuantity": {
+                  "type": "number",
+                  "readOnly": true
+                },
+                "product": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "readOnly": true
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "brand": {
+                      "type": "string"
+                    },
+                    "price": {
+                      "type": "number"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "stock": {
+                      "type": "number"
+                    },
+                    "isAvailable": {
+                      "type": "boolean",
+                      "readOnly": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "CartsList": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Generated with UUID V4",
+              "readOnly": true
+            },
+            "cartsProducts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "readOnly": true
+                  },
+                  "productQuantity": {
+                    "type": "number",
+                    "readOnly": true
+                  },
+                  "product": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "readOnly": true
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "brand": {
+                        "type": "string"
+                      },
+                      "price": {
+                        "type": "number"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "stock": {
+                        "type": "number"
+                      },
+                      "isAvailable": {
+                        "type": "boolean",
+                        "readOnly": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "CartRemoveProduct": {
+        "type": "object",
+        "properties": {
+          "cartId": {
+            "type": "string"
+          }
+        }
+      },
+
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "total": {
+            "type": "number",
+            "readOnly": true
+          },
+          "ordersProducts": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "readOnly": true
+                },
+                "productQuantity": {
+                  "type": "number",
+                  "readOnly": true
+                },
+                "product": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "readOnly": true
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "brand": {
+                      "type": "string"
+                    },
+                    "price": {
+                      "type": "number"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "stock": {
+                      "type": "number"
+                    },
+                    "isAvailable": {
+                      "type": "boolean",
+                      "readOnly": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "OrdersList": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Generated with UUID V4",
+              "readOnly": true
+            },
+            "total": {
+              "type": "number",
+              "readOnly": true
+            },
+            "user": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Generated with UUID V4",
+                  "readOnly": true
+                },
+                "name": {
+                  "type": "string"
+                },
+                "cpf": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "phone": {
+                  "type": "string"
+                },
+                "isAdm": {
+                  "type": "boolean"
+                },
+                "password": {
+                  "type": "string",
+                  "description": "Hashed with BCrypt",
+                  "writeOnly": true
+                }
+              }
+            },
+            "ordersProducts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "readOnly": true
+                  },
+                  "productQuantity": {
+                    "type": "number",
+                    "readOnly": true
+                  },
+                  "product": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "readOnly": true
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "brand": {
+                        "type": "string"
+                      },
+                      "price": {
+                        "type": "number"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "stock": {
+                        "type": "number"
+                      },
+                      "isAvailable": {
+                        "type": "boolean",
+                        "readOnly": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "EmailToUser": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+
+      "RecoveryPassword": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+
+      "ChangePassword": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "newPassword": {
+            "type": "string"
+          },
+          "verificationCode": {
+            "type": "string"
+          }
+        }
+      },
+
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+
+      "Error422": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "array"
+          }
+        }
+      }
+    },
+
+    "securitySchemes": {
+      "JWT": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+
+  "security": [
+    {
+      "JWT": []
+    }
+  ]
+}

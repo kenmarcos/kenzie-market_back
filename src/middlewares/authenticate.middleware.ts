@@ -8,7 +8,7 @@ export const authenticateUser = async (
   next: NextFunction
 ) => {
   if (!req.headers.authorization) {
-    return next(new ErrorHandler(401, "Missing authorization headers"));
+    return next(new ErrorHandler(401, "missing authorization headers"));
   }
 
   const token = req.headers.authorization.split(" ")[1];
@@ -18,7 +18,7 @@ export const authenticateUser = async (
     process.env.JWT_SECRET as string,
     async (err: any, decode: any) => {
       if (err) {
-        return next(new ErrorHandler(401, "Invalid token"));
+        return next(new ErrorHandler(401, "invalid token"));
       }
       const idLogged = decode.idLogged;
 

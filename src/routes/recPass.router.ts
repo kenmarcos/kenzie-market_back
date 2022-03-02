@@ -9,8 +9,8 @@ import { send, change } from "./../controllers/recPass.controller";
 const router = express.Router();
 
 export const recPassRouter = () => {
-  router.post("/recuperar", validate(sendPassRecTokenSchema), send);
-  router.post("/alterar_senha", validate(changePassSchema), change);
+  router.post("/recover", validate(sendPassRecTokenSchema), send);
+  router.post("/change_password", validate(changePassSchema), change);
 
   return router;
 };

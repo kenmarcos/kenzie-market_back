@@ -7,7 +7,7 @@ export const buy = async (req: Request, res: Response, next: NextFunction) => {
 
     const order = await buyOrder(idLogged);
 
-    res.json({ order });
+    res.status(201).json(order);
   } catch (e) {
     next(e);
   }
@@ -19,7 +19,7 @@ export const list = async (req: Request, res: Response, next: NextFunction) => {
 
     const orders = await listOrders(idLogged);
 
-    return res.json({ orders });
+    return res.json(orders);
   } catch (e) {
     next(e);
   }
@@ -36,7 +36,7 @@ export const listOne = async (
 
     const order = await findOrder(idLogged, id);
 
-    return res.json({ order });
+    return res.json(order);
   } catch (e) {
     next(e);
   }

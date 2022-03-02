@@ -21,6 +21,10 @@ export const buyOrder = async (idLogged: string) => {
     where: { cart },
   });
 
+  if (cartsProducts.length === 0) {
+    throw new ErrorHandler(400, "cart is empty");
+  }
+
   let total = 0;
   cartsProducts.map((cartProduct) => {
     total = total + cartProduct.productQuantity * cartProduct.product.price;
@@ -63,7 +67,7 @@ export const buyOrder = async (idLogged: string) => {
 
   transport.sendMail(options, (err, info) => {
     if (err) {
-      throw new ErrorHandler(500, "error while sending the email");
+      throw new ErrorHandler(500, "error sending order confirmation email");
     }
   });
 

@@ -23,7 +23,7 @@ export const list = async (req: Request, res: Response, next: NextFunction) => {
 
     const users = await listUsers(idLogged);
 
-    return res.json({ users });
+    return res.json(users);
   } catch (e) {
     next(e);
   }
@@ -40,7 +40,7 @@ export const listOne = async (
 
     const user = await findUser(idLogged, id);
 
-    return res.json({ user });
+    return res.json(user);
   } catch (e) {
     next(e);
   }

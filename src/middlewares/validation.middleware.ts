@@ -13,6 +13,6 @@ export const validate =
       });
       return next();
     } catch (e: any) {
-      return res.status(422).json({ message: e.errors });
+      return res.status(422).json({ error: e.errors });
     }
   };

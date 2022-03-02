@@ -12,7 +12,7 @@ export const add = async (req: Request, res: Response, next: NextFunction) => {
 
     const cart = await addProductToCart(idLogged, body);
 
-    return res.json({ cart });
+    return res.json(cart);
   } catch (e) {
     next(e);
   }
@@ -24,7 +24,7 @@ export const list = async (req: Request, res: Response, next: NextFunction) => {
 
     const carts = await listCarts(idLogged);
 
-    return res.json({ carts });
+    return res.json(carts);
   } catch (e) {
     next(e);
   }
@@ -40,7 +40,7 @@ export const listOne = async (
     const { id } = req.params;
 
     const cart = await findCart(idLogged, id);
-    return res.json({ cart });
+    return res.json(cart);
   } catch (e) {
     next(e);
   }

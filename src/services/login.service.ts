@@ -19,9 +19,9 @@ export const createToken = async (body: LoginBody) => {
   });
 
   if (!user) {
-    throw new ErrorHandler(404, "User not found");
+    throw new ErrorHandler(404, "user not found");
   } else if (!bcrypt.compareSync(password, user.password)) {
-    throw new ErrorHandler(401, "Wrong password");
+    throw new ErrorHandler(401, "wrong password");
   }
 
   const token = jwt.sign(
