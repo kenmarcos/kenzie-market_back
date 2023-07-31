@@ -48,11 +48,6 @@ export const buyOrder = async (idLogged: string) => {
     await orderProductRepository.save(orderProduct);
   }
 
-  const ordersProducts = await orderProductRepository.find({
-    where: { order },
-    relations: ["product"],
-  });
-
   const options = mailOptions(
     "no-reply@kenziemarket.com",
     [(user as User).email],
@@ -73,7 +68,7 @@ export const buyOrder = async (idLogged: string) => {
 
   await cartProductRepository.delete({ cart });
 
-  const newOrder = orderRepository.findOne({
+  const newOrder = await orderRepository.findOne(order.id, {
     join: {
       alias: "orders",
       leftJoinAndSelect: {
