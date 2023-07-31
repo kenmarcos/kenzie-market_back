@@ -24,13 +24,13 @@ export const createToken = async (body: LoginBody) => {
     throw new ErrorHandler(401, "wrong password");
   }
 
-  const token = jwt.sign(
-    { idLogged: user.id },
-    process.env.JWT_SECRET as string,
-    {
-      expiresIn: "24h",
-    }
-  );
+  if (!process.env.JWT_SECRET) {
+    throw new ErrorHandler(500, "JWT_SECRET environment variable not found");
+  }
+
+  const token = jwt.sign({ idLogged: user.id }, process.env.JWT_SECRET, {
+    expiresIn: "24h",
+  });
 
   return token;
 };
