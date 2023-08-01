@@ -60,11 +60,14 @@ export const buyOrder = async (idLogged: string) => {
     }
   );
 
-  transport.sendMail(options, (err, info) => {
-    if (err) {
-      throw new ErrorHandler(500, "error sending order confirmation email");
-    }
-  });
+  await transport
+    .sendMail(options)
+    .then(() => {
+      console.log("Email sent with success!");
+    })
+    .catch((err) => {
+      throw new ErrorHandler(500, "error while sending the email");
+    });
 
   await cartProductRepository.delete({ cart });
 

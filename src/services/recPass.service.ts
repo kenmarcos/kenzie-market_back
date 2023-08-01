@@ -38,11 +38,14 @@ export const sendPassRecToken = async (body: { email: string }) => {
     }
   );
 
-  transport.sendMail(options, (err, info) => {
-    if (err) {
+  await transport
+    .sendMail(options)
+    .then(() => {
+      console.log("Email sent with success!");
+    })
+    .catch((err) => {
       throw new ErrorHandler(500, "error while sending the email");
-    }
-  });
+    });
 
   await userRepository.save(user);
 };

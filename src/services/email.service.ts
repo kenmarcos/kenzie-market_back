@@ -3,13 +3,26 @@ import path from "path";
 import hbs, {
   NodemailerExpressHandlebarsOptions,
 } from "nodemailer-express-handlebars";
+import dotenv from "dotenv";
 
+dotenv.config();
+
+// Configuração de nodemailer com mailtrap
+// export const transport = nodemailer.createTransport({
+//   host: "smtp.mailtrap.io",
+//   port: 2525,
+//   auth: {
+//     user: "process.env.MAILTRAP_USER",
+//     pass: "process.env.MAILTRAP_PASSWORD",
+//   },
+// });
+
+// Configuração de nodemailer com gmail
 export const transport = nodemailer.createTransport({
-  host: "smtp.mailtrap.io",
-  port: 2525,
+  service: "gmail",
   auth: {
-    user: "0c885d9016545e",
-    pass: "2b117da1fea5ba",
+    user: process.env.GMAIL_EMAIL,
+    pass: process.env.GMAIL_PASSWORD,
   },
 });
 

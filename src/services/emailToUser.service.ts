@@ -27,9 +27,12 @@ export const sendEmailToUser = async (
     name: userLogged.name,
   });
 
-  transport.sendMail(options, (err, info) => {
-    if (err) {
+  await transport
+    .sendMail(options)
+    .then(() => {
+      console.log("Email sent with success!");
+    })
+    .catch((err) => {
       throw new ErrorHandler(500, "error while sending the email");
-    }
-  });
+    });
 };
