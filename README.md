@@ -48,14 +48,14 @@ Algumas funcionalidades dessa aplicação são:
 | GET | /user | Seleciona todos os usuários | Apenas os administradores podem fazer essa ação |
 | POST | /login | Gera um toke de autenticação | Login via e-mail e password |
 | POST | /product | Cadastra um único produto | Apenas usuário do tipo administrador pode realizar essa asção |
-| GET | /product/\productId | Seleciona um determinado produto pelo id | Qualquer usuário pode realizar essa ação |
+| GET | /product/\<productId> | Seleciona um determinado produto pelo id | Qualquer usuário pode realizar essa ação |
 | GET | /product | Seleciona todos os produtos cadastrados | Qualquer usuário pode realizar essa ação |
 | POST | /cart | Adiciona um produto no carrinho | Apenas usuários logados devem adicionar o produto no carrinho |
-| GET | /cart/\cartId | Seleciona o carrinho do usuário | Usuários do tipo cliente são restritos as suas próprias informações. Ou seja: um cliente não pode selecionar o carrinho de outro usuário, mas um administrador pode selecionar qualquer carrinho do sistema |
+| GET | /cart/\<cartId> | Seleciona o carrinho do usuário | Usuários do tipo cliente são restritos as suas próprias informações. Ou seja: um cliente não pode selecionar o carrinho de outro usuário, mas um administrador pode selecionar qualquer carrinho do sistema |
 | GET | /cart | Seleciona todos os carrinhos | Apenas os administradores podem realizar essa ação |
-| DELETE | /cart/\productId | Deleta um produto do carrinho | Apenas o usuário dono do carrinho e o administrador pode realizar essa ação |
+| DELETE | /cart/\<productId> | Deleta um produto do carrinho | Apenas o usuário dono do carrinho e o administrador pode realizar essa ação |
 | POST | /buy | Realiza compra dos produtos do carrinho | Apenas o dono do carrinho pode finalizar uma compra e após a sua finalização um email com os dados da compra deve ser disparado para o usuário |
-| GET | /buy/\orderId | Seleciona uma compra já realizada | Apenas o usuário dono da compra e o administrador pode realizar essa ação |
+| GET | /buy/\<orderId> | Seleciona uma compra já realizada | Apenas o usuário dono da compra e o administrador pode realizar essa ação |
 | GET | /buy | Seleciona todas as compras já realizadas | Apenas o administrador pode realizar essa ação |
 | POST | /email | Envia um email qualquer para um determinado usuário | Caso o administrador queira mandar alguma mensagem para um usuário qualquer. Apenas o administrador pode realizar essa ação |
 | POST | /recover | Envia um código de validação para o email do usuário | O sistema deverá gerar um código validador qualquer na qual será usado para a recuperação de senha |
